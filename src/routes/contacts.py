@@ -32,10 +32,10 @@ async def get_contacts(
 ):
     if firstname or lastname or email:
         contacts = await repository_contacts.get_contact_by_filter(
-            db, firstname, lastname, email
+            db, current_user, firstname, lastname, email
         )
     else:
-        contacts = await repository_contacts.get_contacts(db)
+        contacts = await repository_contacts.get_contacts(db, current_user)
 
     if not contacts:
         raise HTTPException(
@@ -55,7 +55,7 @@ async def get_contacts(
     db: Session = Depends(get_db),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    contacts = await repository_contacts.contacts_per_days(days, db)
+    contacts = await repository_contacts.contacts_per_days(days, db, current_user)
     if contacts is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
     return contacts
@@ -71,7 +71,7 @@ async def get_contact(
     db: Session = Depends(get_db),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    contact = await repository_contacts.get_contact_by_id(contact_id, db)
+    contact = await repository_contacts.get_contact_by_id(contact_id, db, current_user)
     if contact is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
     return contact
@@ -88,13 +88,14 @@ async def create_contact(
     db: Session = Depends(get_db),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    contact = await repository_contacts.get_contact_by_email(body.email, db)
+    contact = await repository_contacts.get_contact_by_email(body.email, db, current_user)
     if contact:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"Contact with email:{body.email} already exist!",
         )
-    contact = await repository_contacts.create_contact(body, db)
+    contact = await repository_contacts.create_contact(body, db, current_user)
+
     return contact
 
 
@@ -109,7 +110,7 @@ async def update_contact(
     db: Session = Depends(get_db),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    owner = await repository_contacts.update_contact(body, contact_id, db)
+    owner = await repository_contacts.update_contact(body, contact_id, db, current_user)
     if owner is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
     return owner

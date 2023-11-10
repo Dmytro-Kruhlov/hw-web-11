@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime, func, Enum
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import Column, Integer, String, DateTime, func, Enum, ForeignKey
+from sqlalchemy.orm import declarative_base, relationship
 import enum
 Base = declarative_base()
 
@@ -31,5 +31,5 @@ class Contact(Base):
     birthday = Column(String, nullable=True)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-
-
+    user_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'), nullable=False, default=1)
+    user = relationship("User", backref='contacts')
