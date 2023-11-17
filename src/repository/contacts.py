@@ -6,7 +6,7 @@ from datetime import date, timedelta
 
 
 async def get_contacts(db: Session, current_user: User):
-    contacts = db.query(Contact).filter_by(current_user=current_user.id).all()
+    contacts = db.query(Contact).filter_by(user_id=current_user.id).all()
     return contacts
 
 
@@ -32,11 +32,11 @@ async def get_contact_by_filter(
     query = db.query(Contact)
 
     if firstname:
-        query = query.filter(firstname=firstname, user_id=current_user.id)
+        query = query.filter_by(firstname=firstname, user_id=current_user.id)
     if lastname:
-        query = query.filter(lastname=lastname, user_id=current_user.id)
+        query = query.filter_by(lastname=lastname, user_id=current_user.id)
     if email:
-        query = query.filter(email=email, user_id=current_user.id)
+        query = query.filter_by(email=email, user_id=current_user.id)
 
     contacts = query.all()
     return contacts

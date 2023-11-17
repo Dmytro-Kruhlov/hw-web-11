@@ -1,4 +1,13 @@
-from sqlalchemy import Column, Integer, String, DateTime, func, Enum, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    DateTime,
+    func,
+    Enum,
+    ForeignKey,
+    Boolean,
+)
 from sqlalchemy.orm import declarative_base, relationship
 import enum
 Base = declarative_base()
@@ -19,6 +28,7 @@ class User(Base):
     refresh_token = Column(String(255), nullable=True)
     avatar = Column(String(255), nullable=True)
     role = Column("role", Enum(Role), default=Role.user)
+    confirmed = Column(Boolean, default=False)
 
 
 class Contact(Base):

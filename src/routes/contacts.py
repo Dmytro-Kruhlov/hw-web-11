@@ -1,6 +1,7 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status, Path, Query
+from fastapi_limiter.depends import RateLimiter
 from sqlalchemy.orm import Session
 
 from src.database.db import get_db
@@ -21,7 +22,7 @@ allowed_operation_remove = RoleAccess([Role.admin])
 @router.get(
     "/",
     response_model=List[ResponseContact],
-    dependencies=[Depends(allowed_operation_get)],
+    dependencies=[Depends(allowed_operation_get), Depends(RateLimiter(times=2, seconds=5))],
 )
 async def get_contacts(
     db: Session = Depends(get_db),
@@ -48,7 +49,7 @@ async def get_contacts(
 @router.get(
     "/{days}",
     response_model=List[ResponseContact],
-    dependencies=[Depends(allowed_operation_get)],
+    dependencies=[Depends(allowed_operation_get), Depends(RateLimiter(times=2, seconds=5))],
 )
 async def get_contacts(
     days: int,
@@ -64,7 +65,7 @@ async def get_contacts(
 @router.get(
     "/{contact_id}",
     response_model=ResponseContact,
-    dependencies=[Depends(allowed_operation_get)],
+    dependencies=[Depends(allowed_operation_get), Depends(RateLimiter(times=2, seconds=5))],
 )
 async def get_contact(
     contact_id: int = Path(ge=1),
@@ -81,7 +82,7 @@ async def get_contact(
     "/",
     response_model=ResponseContact,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(allowed_operation_create)],
+    dependencies=[Depends(allowed_operation_create), Depends(RateLimiter(times=2, seconds=5))],
 )
 async def create_contact(
     body: ContactModel,
@@ -102,7 +103,7 @@ async def create_contact(
 @router.patch(
     "/{contact_id}",
     response_model=ResponseContact,
-    dependencies=[Depends(allowed_operation_update)],
+    dependencies=[Depends(allowed_operation_update), Depends(RateLimiter(times=2, seconds=5))],
 )
 async def update_contact(
     body: ContactUpdateModel,
@@ -119,7 +120,7 @@ async def update_contact(
 @router.delete(
     "/{contact_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Depends(allowed_operation_remove)],
+    dependencies=[Depends(allowed_operation_remove), Depends(RateLimiter(times=2, seconds=5))],
 )
 async def remove_contact(
     contact_id: int = Path(ge=1),
