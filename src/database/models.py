@@ -8,6 +8,7 @@ from sqlalchemy import (
     ForeignKey,
     Boolean,
 )
+
 from sqlalchemy.orm import declarative_base, relationship
 import enum
 Base = declarative_base()

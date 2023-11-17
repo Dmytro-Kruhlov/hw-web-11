@@ -37,7 +37,6 @@ async def get_contact_by_filter(
         query = query.filter_by(lastname=lastname, user_id=current_user.id)
     if email:
         query = query.filter_by(email=email, user_id=current_user.id)
-
     contacts = query.all()
     return contacts
 
