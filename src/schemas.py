@@ -1,6 +1,8 @@
 from pydantic import BaseModel, EmailStr, Field
 from datetime import date
 
+from pydantic_settings import SettingsConfigDict
+
 from src.database.models import Role
 
 
@@ -13,15 +15,13 @@ class ContactModel(BaseModel):
 
 
 class ResponseContact(BaseModel):
+    model_config = SettingsConfigDict(from_attributes=True)
     id: int
     firstname: str
     lastname: str
     email: EmailStr
     phone: str
     birthday: date | None
-
-    class Config:
-        from_attributes = True
 
 
 class ContactUpdateModel(BaseModel):
@@ -36,14 +36,12 @@ class UserModel(BaseModel):
 
 
 class UserResponse(BaseModel):
+    model_config = SettingsConfigDict(from_attributes=True)
     id: int
     username: str
     email: str
     avatar: str
     role: Role
-
-    class Config:
-        from_attributes = True
 
 
 class TokenModel(BaseModel):

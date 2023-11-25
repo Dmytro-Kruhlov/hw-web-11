@@ -31,6 +31,18 @@ async def get_contacts(
     email: str = Query(default=None),
     current_user: User = Depends(auth_service.get_current_user),
 ):
+    """
+    The get_contacts function returns a list of contacts.
+
+    :param db: Session: Get the database session
+    :param firstname: str: Filter the contacts by firstname
+    :param lastname: str: Filter the contacts by lastname
+    :param email: str: Filter the contacts by email
+    :param current_user: User: Get the current user from the database
+    :param : Get the contact by id
+    :return: A list of contacts
+    :doc-author: Trelent
+    """
     if firstname or lastname or email:
         contacts = await repository_contacts.get_contact_by_filter(
             db, current_user, firstname, lastname, email
@@ -47,15 +59,27 @@ async def get_contacts(
 
 
 @router.get(
-    "/{days}",
+    "/days/{days}",
     response_model=List[ResponseContact],
     dependencies=[Depends(allowed_operation_get), Depends(RateLimiter(times=2, seconds=5))],
 )
-async def get_contacts(
+async def get_contacts_by_days(
     days: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(auth_service.get_current_user),
 ):
+    """
+    The get_contacts function returns a list of contacts for the current user.
+    The function takes in an optional days parameter, which is used to filter the results by date.
+    If no days parameter is provided, all contacts are returned.
+
+    :param days: int: Specify the number of days to get contacts for
+    :param db: Session: Pass the database session to the repository layer
+    :param current_user: User: Get the user from the database
+    :param : Specify the number of days to look back for contacts
+    :return: A list of contacts
+    :doc-author: Trelent
+    """
     contacts = await repository_contacts.contacts_per_days(days, db, current_user)
     if contacts is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
@@ -63,15 +87,26 @@ async def get_contacts(
 
 
 @router.get(
-    "/{contact_id}",
+    "/contact/{contact_id}",
     response_model=ResponseContact,
     dependencies=[Depends(allowed_operation_get), Depends(RateLimiter(times=2, seconds=5))],
 )
-async def get_contact(
+async def get_contact_by_id(
     contact_id: int = Path(ge=1),
     db: Session = Depends(get_db),
     current_user: User = Depends(auth_service.get_current_user),
 ):
+    """
+    The get_contact function is a GET request that returns the contact with the given ID.
+    If no such contact exists, it raises an HTTP 404 error.
+
+    :param contact_id: int: Get the contact id from the path
+    :param db: Session: Pass the database session to the function
+    :param current_user: User: Get the current user from the database
+    :param : Specify the type of data that is expected in the request body
+    :return: A contact object
+    :doc-author: Trelent
+    """
     contact = await repository_contacts.get_contact_by_id(contact_id, db, current_user)
     if contact is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
@@ -89,6 +124,16 @@ async def create_contact(
     db: Session = Depends(get_db),
     current_user: User = Depends(auth_service.get_current_user),
 ):
+    """
+    The create_contact function creates a new contact in the database.
+
+    :param body: ContactModel: Get the data from the request body
+    :param db: Session: Pass the database session to the repository
+    :param current_user: User: Get the current user
+    :param : Get the contact id from the url
+    :return: A contact model object
+    :doc-author: Trelent
+    """
     contact = await repository_contacts.get_contact_by_email(body.email, db, current_user)
     if contact:
         raise HTTPException(
@@ -111,10 +156,24 @@ async def update_contact(
     db: Session = Depends(get_db),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    owner = await repository_contacts.update_contact(body, contact_id, db, current_user)
-    if owner is None:
+    """
+    The update_contact function updates a contact in the database.
+        The function takes an id of the contact to be updated, and a body containing
+        all fields that are to be updated. If any field is not provided, it will not
+        be changed in the database.
+
+    :param body: ContactUpdateModel: Get the data from the request body
+    :param contact_id: int: Specify the contact id to be deleted
+    :param db: Session: Get the database session
+    :param current_user: User: Get the current user
+    :param : Get the id of the contact to be deleted
+    :return: The updated contact
+    :doc-author: Trelent
+    """
+    contact = await repository_contacts.update_contact(body, contact_id, db, current_user)
+    if contact is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
-    return owner
+    return contact
 
 
 @router.delete(
@@ -127,6 +186,16 @@ async def remove_contact(
     db: Session = Depends(get_db),
     current_user: User = Depends(auth_service.get_current_user),
 ):
+    """
+    The remove_contact function removes a contact from the database.
+
+    :param contact_id: int: Specify the contact to be removed
+    :param db: Session: Pass the database connection to the repository layer
+    :param current_user: User: Get the current user from the database
+    :param : Get the contact id from the path
+    :return: A contact object
+    :doc-author: Trelent
+    """
     contact = await repository_contacts.remove_contact(contact_id, db)
     if contact is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
